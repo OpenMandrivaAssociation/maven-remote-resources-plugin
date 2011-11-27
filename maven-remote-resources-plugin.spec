@@ -1,6 +1,6 @@
 Name:           maven-remote-resources-plugin
 Version:        1.1
-Release:        8
+Release:        10
 Summary:        Maven Remote Resources Plugin
 
 Group:          Development/Java
