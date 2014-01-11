@@ -25,9 +25,7 @@ BuildRequires: plexus-containers-container-default
 BuildRequires: velocity
 BuildRequires: maven-shared-artifact-resolver
 BuildRequires: maven-shared-common-artifact-filters
-%if 0%{?fedora}
 BuildRequires: maven-shared-downloader
-%endif
 BuildRequires: plexus-interpolation
 BuildRequires: plexus-utils
 BuildRequires: plexus-velocity
