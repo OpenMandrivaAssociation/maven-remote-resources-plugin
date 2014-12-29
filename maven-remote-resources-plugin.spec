@@ -1,59 +1,41 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:           maven-remote-resources-plugin
 Version:        1.4
-Release:        5.1%{?dist}
+Release:        9.1
 Summary:        Maven Remote Resources Plugin
-
-
+Group:		Development/Java
 License:        ASL 2.0
 URL:            http://maven.apache.org/plugins/maven-remote-resources-plugin/
+BuildArch:      noarch
+
 Source0:        http://repo2.maven.org/maven2/org/apache/maven/plugins/%{name}/%{version}/%{name}-%{version}-source-release.zip
 
-BuildArch: noarch
+BuildRequires:  maven-local
+BuildRequires:  mvn(junit:junit)
+BuildRequires:  mvn(org.apache.maven:maven-artifact)
+BuildRequires:  mvn(org.apache.maven:maven-core)
+BuildRequires:  mvn(org.apache.maven:maven-model)
+BuildRequires:  mvn(org.apache.maven:maven-monitor)
+BuildRequires:  mvn(org.apache.maven:maven-plugin-api)
+BuildRequires:  mvn(org.apache.maven:maven-project)
+BuildRequires:  mvn(org.apache.maven:maven-settings)
+BuildRequires:  mvn(org.apache.maven.plugins:maven-plugin-plugin)
+BuildRequires:  mvn(org.apache.maven.plugins:maven-plugins:pom:)
+BuildRequires:  mvn(org.apache.maven.plugin-tools:maven-plugin-annotations)
+BuildRequires:  mvn(org.apache.maven.shared:maven-artifact-resolver)
+BuildRequires:  mvn(org.apache.maven.shared:maven-common-artifact-filters)
+BuildRequires:  mvn(org.apache.maven.shared:maven-filtering)
+BuildRequires:  mvn(org.apache.maven.shared:maven-plugin-testing-harness)
+BuildRequires:  mvn(org.apache.maven.shared:maven-verifier)
+BuildRequires:  mvn(org.apache.maven.wagon:wagon-provider-api)
+BuildRequires:  mvn(org.apache.velocity:velocity)
+BuildRequires:  mvn(org.codehaus.modello:modello-maven-plugin)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-container-default)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-interpolation)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-resources)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-utils)
+BuildRequires:  mvn(org.codehaus.plexus:plexus-velocity)
 
-BuildRequires: java-devel >= 1:1.6.0
-BuildRequires: maven-local
-BuildRequires: maven-plugin-plugin
-BuildRequires: maven-compiler-plugin
-BuildRequires: maven-install-plugin
-BuildRequires: maven-jar-plugin
-BuildRequires: maven-javadoc-plugin
-BuildRequires: maven-resources-plugin
-BuildRequires: maven-surefire-plugin
-BuildRequires: maven-shared-filtering
-BuildRequires: plexus-containers-container-default
-BuildRequires: velocity
-BuildRequires: maven-shared-artifact-resolver
-BuildRequires: maven-shared-common-artifact-filters
-BuildRequires: maven-shared-downloader
-BuildRequires: plexus-interpolation
-BuildRequires: plexus-utils
-BuildRequires: plexus-velocity
-BuildRequires: plexus-resources
-BuildRequires: junit
-BuildRequires: maven-plugin-testing-harness
-BuildRequires: maven-wagon
-BuildRequires: maven-shared-verifier
-BuildRequires: maven-surefire-provider-junit
-BuildRequires: modello
-
-Requires:       java
-Requires:       maven
-Requires:       maven-artifact-resolver
-Requires:       maven-common-artifact-filters
-Requires:       maven-filtering
-Requires:       maven-monitor
-Requires:       maven-plugin-annotations
-Requires:       maven-project
-Requires:       plexus-containers-container-default
-Requires:       plexus-interpolation
-Requires:       plexus-resources
-Requires:       plexus-utils
-Requires:       plexus-velocity
-Requires:       velocity
-
-Obsoletes:      maven2-plugin-remote-resources <= 0:2.0.8
-Provides:       maven2-plugin-remote-resources = 1:%{version}-%{release}
 
 %description
 Process resources packaged in JARs that have been deployed to
@@ -64,13 +46,10 @@ licensing requirements at Apache where each project much include
 license and notice files for each release.
 
 %package javadoc
-
 Summary:        Javadoc for %{name}
-Requires:       jpackage-utils
 
 %description javadoc
 API documentation for %{name}.
-
 
 %prep
 %setup -q
@@ -80,37 +59,36 @@ API documentation for %{name}.
 #the version 1.3 of maven-shared-common-artifact-filters package.
 sed -i "s/TransitivityFilter/Project&/" `find -name ProcessRemoteResourcesMojo.java`
 
-%build
 # fix 613582
 # we now use plexus-velocity which has the correct descriptor with a hint.
 rm -f src/main/resources/META-INF/plexus/components.xml
 
-mvn-rpmbuild install javadoc:aggregate -Dmaven.test.skip=true
+%build
+# Tests use Maven 2 APIs
+%mvn_build -f
 
 %install
-# jars
-install -Dpm 644 target/%{name}-%{version}.jar   %{buildroot}%{_javadir}/%{name}.jar
-# poms
-install -Dpm 644 pom.xml %{buildroot}%{_mavenpomdir}/JPP-%{name}.pom
+%mvn_install
 
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
+%files -f .mfiles
+%doc LICENSE NOTICE
 
-
-# javadoc
-install -d -m 0755 %{buildroot}%{_javadocdir}/%{name}
-cp -pr target/site/api*/* %{buildroot}%{_javadocdir}/%{name}/
-
-%files
-%doc DEPENDENCIES LICENSE NOTICE
-%{_javadir}/*
-%{_mavenpomdir}/*
-%{_mavendepmapfragdir}/*
-
-%files javadoc
-%doc DEPENDENCIES LICENSE NOTICE
-%{_javadocdir}/%{name}
+%files javadoc -f .mfiles-javadoc
+%doc LICENSE NOTICE
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Wed May 21 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.4-8
+- Update to current packaging guidelines
+
+* Tue Mar 04 2014 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.4-7
+- Use Requires: java-headless rebuild (#1067528)
+
+* Thu Feb 20 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.4-6
+- Migrate to Wagon subpackages
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
@@ -179,3 +157,4 @@ cp -pr target/site/api*/* %{buildroot}%{_javadocdir}/%{name}/
 
 * Fri May 21 2010 Hui Wang <huwang@redhat.com> - 1.1-1
 - Initial version of the package
+
