@@ -1,7 +1,7 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:           maven-remote-resources-plugin
 Version:        1.4
-Release:        9.1
+Release:        9.2
 Summary:        Maven Remote Resources Plugin
 Group:		Development/Java
 License:        ASL 2.0
